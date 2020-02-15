@@ -1,5 +1,6 @@
 package com.simasjid.simasjid;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -20,15 +21,16 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.zxing.Result;
+
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 
 public class scanner extends AppCompatActivity implements ZXingScannerView.ResultHandler {
 
     private ZXingScannerView mScannerView;
-    Button button;
-    Button button2;
-    EditText editText;
+
+    private static final int CAMERA_PERMISSION_CODE = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,18 +38,9 @@ public class scanner extends AppCompatActivity implements ZXingScannerView.Resul
         setContentView(R.layout.activity_scanner);
         Toast.makeText(getApplicationContext(), "Membuka scanner...", Toast.LENGTH_SHORT).show();
         generate();
-
-//        button = (Button)findViewById(R.id.button);
-//
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                generate();
-//            }
-//        });
     }
 
-    private void generate(){
+    private void generate() {
         mScannerView = new ZXingScannerView(scanner.this);
         setContentView(mScannerView);
         mScannerView.setResultHandler(scanner.this);
@@ -56,7 +49,7 @@ public class scanner extends AppCompatActivity implements ZXingScannerView.Resul
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         mScannerView.stopCamera();
     }
@@ -68,7 +61,7 @@ public class scanner extends AppCompatActivity implements ZXingScannerView.Resul
         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
         mScannerView.stopCamera();
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.putExtra ("kode_aset", text);
+        intent.putExtra("kode_aset", text);
         startActivity(intent);
     }
 }

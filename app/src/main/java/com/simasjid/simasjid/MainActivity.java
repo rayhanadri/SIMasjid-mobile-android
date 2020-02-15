@@ -1,7 +1,10 @@
 package com.simasjid.simasjid;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,11 +20,19 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+
+    private static final int STORAGE_PERMISSION_CODE = 1;
+    private static final int CAMERA_PERMISSION_CODE = 2;
+
     WebView webviewku;
     WebSettings websettingku;
     ProgressBar progressBar;
@@ -62,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             webviewku.loadUrl("https://simasjid.my.id");
         }
 
-       //setwebchrome
+        //setwebchrome
         webviewku.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, int progress) {
                 progressBar.setProgress(progress);
@@ -75,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                 }
             }
+
             //filechooser
             // For 3.0+ Devices (Start)
             // onActivityResult attached before constructor
@@ -127,6 +139,24 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         webviewku.setWebViewClient(new MyBrowser());
 
+        //check permission storage
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
+                READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "You already granted this permission!", Toast.LENGTH_SHORT)
+                    .show();
+        } else {
+            requestStoragePermission();
+        }
+
+        //check permission camera
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
+                CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(MainActivity.this, "Izin telah diberikan", Toast.LENGTH_SHORT)
+                    .show();
+        } else {
+            requestCameraPermission();
+        }
+
 
 //        webviewku.setWebViewClient(new WebViewClient() {
 //            class MyWebViewClient extends WebViewClient {
@@ -138,6 +168,70 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 //            }
 //        });
     }
+
+    private void requestStoragePermission(){
+        if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
+            new AlertDialog.Builder(this)
+                    .setTitle("Izin akses penyimpanan dibutuhkan")
+                    .setMessage("Izin akses dibutuhkan untuk mengakses file perangkat")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).create().show();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+        }
+    }
+
+    private void requestCameraPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Izin akses kamera dibutuhkan")
+                    .setMessage("Izin akses dibutuhkan untuk mengakses kamera perangkat")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).create().show();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == STORAGE_PERMISSION_CODE) {
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+        if(requestCode == CAMERA_PERMISSION_CODE) {
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
 
     @Override
     public void onRefresh() {
@@ -164,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-        if ((keyCode == KeyEvent.KEYCODE_BACK) && webviewku.canGoBack()){
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && webviewku.canGoBack()) {
             webviewku.goBack();
             return true;
         }
