@@ -3,6 +3,7 @@ package com.simasjid.simasjid;
 import android.Manifest;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -35,9 +36,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
-    private static final int STORAGE_PERMISSION_CODE = 1;
-    private static final int CAMERA_PERMISSION_CODE = 2;
-
     WebView webviewku;
     WebSettings websettingku;
     ProgressBar progressBar;
@@ -54,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //permission check
+        this.permissionChecking();
 
         //refreshlayout
         refreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
@@ -164,43 +165,34 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
 
         webviewku.setWebViewClient(new MyBrowser());
-        this.permissionChecking();
+
+
+//        this.storagePermissionChecking();
     }
 
-    public void permissionChecking () {
-        int P_STORAGE = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
-                READ_EXTERNAL_STORAGE);
-        int P_CAMERA = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
-                CAMERA);
-        if (P_STORAGE != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-        }
-        if (P_CAMERA != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+    public void permissionChecking() {
+        int PERMISSION_ALL = 1;
+        String[] PERMISSIONS = {
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                android.Manifest.permission.CAMERA
+        };
+
+        if (!hasPermissions(this, PERMISSIONS)){
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == STORAGE_PERMISSION_CODE) {
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                permissionChecking ();
-                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
-            } else {
-                permissionChecking ();
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+    public static boolean hasPermissions(Context context, String ... permissions){
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED){
+                    return false;
+                }
             }
         }
-        if(requestCode == CAMERA_PERMISSION_CODE) {
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
+        return true;
     }
-
-
 
     @Override
     public void onRefresh() {

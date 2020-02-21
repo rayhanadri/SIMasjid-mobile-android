@@ -24,6 +24,8 @@ import com.google.zxing.Result;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
+import static com.simasjid.simasjid.MainActivity.hasPermissions;
+
 
 public class scanner extends AppCompatActivity implements ZXingScannerView.ResultHandler {
 
@@ -35,6 +37,8 @@ public class scanner extends AppCompatActivity implements ZXingScannerView.Resul
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //permission check
+
         setContentView(R.layout.activity_scanner);
         Toast.makeText(getApplicationContext(), "Membuka scanner...", Toast.LENGTH_SHORT).show();
         generate();
