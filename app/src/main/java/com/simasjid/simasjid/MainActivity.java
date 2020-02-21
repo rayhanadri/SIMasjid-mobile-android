@@ -36,7 +36,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final int STORAGE_PERMISSION_CODE = 1;
-    private static final int WRITE_STORAGE_PERMISSION_CODE = 3;
     private static final int CAMERA_PERMISSION_CODE = 2;
 
     WebView webviewku;
@@ -162,112 +161,22 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 i.setType("image/*");
                 startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE);
             }
-
         });
 
         webviewku.setWebViewClient(new MyBrowser());
-
-        //check permission storage
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
-                READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(MainActivity.this, "You already granted this permission!", Toast.LENGTH_SHORT)
-                    .show();
-        } else {
-            requestStoragePermission();
-        }
-
-        //check permission write storage
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
-                WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(MainActivity.this, "You already granted this permission!", Toast.LENGTH_SHORT)
-                    .show();
-        } else {
-            requestWriteStoragePermission();
-        }
-
-        //check permission camera
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
-                CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(MainActivity.this, "Izin telah diberikan", Toast.LENGTH_SHORT)
-                    .show();
-        } else {
-            requestCameraPermission();
-        }
-
-//        webviewku.setWebViewClient(new WebViewClient() {
-//            class MyWebViewClient extends WebViewClient {
-//                @Override
-//                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//                    view.loadUrl(url);
-//                    return true;
-//                }
-//            }
-//        });
+        this.permissionChecking();
     }
 
-    private void requestStoragePermission(){
-        if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
-            new AlertDialog.Builder(this)
-                    .setTitle("Izin akses penyimpanan dibutuhkan")
-                    .setMessage("Izin akses dibutuhkan untuk mengakses file perangkat")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(MainActivity.this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    }).create().show();
-        } else {
+    public void permissionChecking () {
+        int P_STORAGE = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
+                READ_EXTERNAL_STORAGE);
+        int P_CAMERA = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
+                CAMERA);
+        if (P_STORAGE != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
         }
-    }
-
-    private void requestWriteStoragePermission(){
-        if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-            new AlertDialog.Builder(this)
-                    .setTitle("Izin akses penyimpanan dibutuhkan")
-                    .setMessage("Izin akses dibutuhkan untuk menyimpan file ke perangkat")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(MainActivity.this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_STORAGE_PERMISSION_CODE);
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    }).create().show();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_STORAGE_PERMISSION_CODE);
-        }
-    }
-
-    private void requestCameraPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Izin akses kamera dibutuhkan")
-                    .setMessage("Izin akses dibutuhkan untuk mengakses kamera perangkat")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    }).create().show();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+        if (P_CAMERA != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
         }
     }
 
@@ -275,15 +184,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode == STORAGE_PERMISSION_CODE) {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                permissionChecking ();
                 Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-        if(requestCode == WRITE_STORAGE_PERMISSION_CODE) {
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
-            } else {
+                permissionChecking ();
                 Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
             }
         }
@@ -311,13 +215,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             view.loadUrl(url);
             return true;
         }
-
-//        @Override
-//        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-//            view.loadData("Maaf Internet Anda tidak stabil", "text/html", "utf-8");
-//            super.onReceivedError(view, request, error);
-//        }
-
     }
 
     @Override
